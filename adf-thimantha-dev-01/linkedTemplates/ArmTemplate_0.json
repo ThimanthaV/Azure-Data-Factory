@@ -166,7 +166,9 @@
 								"type": "SqlServerSource"
 							},
 							"sink": {
-								"type": "AzureSqlSink"
+								"type": "AzureSqlSink",
+								"preCopyScript": "TRUNCATE TABLE Staging.HumanResources_Department",
+								"disableMetricsCollection": false
 							},
 							"enableStaging": false,
 							"translator": {
