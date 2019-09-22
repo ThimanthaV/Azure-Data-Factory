@@ -1,0 +1,19 @@
+{
+	"name": "Source_HumanResources_Department",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LocalSQLServer",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Source"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "HumanResources",
+			"table": "Department"
+		}
+	}
+}

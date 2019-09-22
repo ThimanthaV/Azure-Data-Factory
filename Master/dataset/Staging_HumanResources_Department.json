@@ -1,0 +1,39 @@
+{
+	"name": "Staging_HumanResources_Department",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSQLDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Staging"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "DepartmentID",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "Name",
+				"type": "varchar"
+			},
+			{
+				"name": "GroupName",
+				"type": "varchar"
+			},
+			{
+				"name": "ModifiedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "Staging",
+			"table": "HumanResources_Department"
+		}
+	}
+}
