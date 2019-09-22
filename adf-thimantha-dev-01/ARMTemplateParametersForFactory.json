@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-thimantha-dev-01"
+		},
+		"AzureSQLDatabase_connectionString": {
+			"value": ""
+		},
+		"LocalSQLServer_connectionString": {
+			"value": ""
+		},
+		"LocalSQLServer_password": {
+			"value": ""
+		},
+		"LocalSQLServer_properties_typeProperties_userName": {
+			"value": "thimanthav@fortude.co"
+		}
+	}
+}
