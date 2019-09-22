@@ -94,6 +94,9 @@
 				]
 			}
 		],
+		"folder": {
+			"name": "Staging"
+		},
 		"annotations": []
 	}
 }

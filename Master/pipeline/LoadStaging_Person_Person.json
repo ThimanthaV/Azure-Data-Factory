@@ -1,5 +1,5 @@
 {
-	"name": "LoadStaging_HumanResources_Department",
+	"name": "LoadStaging_Person_Person",
 	"properties": {
 		"activities": [
 			{
@@ -19,9 +19,7 @@
 						"type": "SqlServerSource"
 					},
 					"sink": {
-						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE Staging.HumanResources_Department",
-						"disableMetricsCollection": false
+						"type": "AzureSqlSink"
 					},
 					"enableStaging": false,
 					"translator": {
@@ -29,32 +27,72 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "DepartmentID",
-									"type": "Int16"
+									"name": "BusinessEntityID",
+									"type": "Int32"
 								},
 								"sink": {
-									"name": "DepartmentID",
-									"type": "Int16"
+									"name": "BusinessEntityID",
+									"type": "Int32"
 								}
 							},
 							{
 								"source": {
-									"name": "Name",
+									"name": "PersonType",
 									"type": "String"
 								},
 								"sink": {
-									"name": "Name",
+									"name": "PersonType",
 									"type": "String"
 								}
 							},
 							{
 								"source": {
-									"name": "GroupName",
+									"name": "Title",
 									"type": "String"
 								},
 								"sink": {
-									"name": "GroupName",
+									"name": "Title",
 									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FirstName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FirstName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MiddleName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MiddleName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LastName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LastName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EmailPromotion",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "EmailPromotion",
+									"type": "Int32"
 								}
 							},
 							{
@@ -72,13 +110,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "Source_HumanResources_Department",
+						"referenceName": "Source_Person_Person",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "Staging_HumanResources_Department",
+						"referenceName": "Staging_Person_Person",
 						"type": "DatasetReference"
 					}
 				]
