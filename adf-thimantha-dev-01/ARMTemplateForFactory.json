@@ -29,6 +29,73 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/LoadDimDepartment')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LoadStaging_HumanResources_Department",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "LoadStaging_HumanResources_Department",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Merge Department",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "LoadStaging_HumanResources_Department",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[Dimension].[MergeDepartment]",
+							"storedProcedureParameters": {
+								"PipelineRunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "Guid"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSQLDatabase",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"folder": {
+					"name": "Dimension"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/LoadStaging_HumanResources_Department')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureSQLDatabase')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LoadStaging_HumanResources_Department')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -347,6 +414,126 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LoadStaging_HumanResources_EmployeeDepartmentHistory')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy source data to staging",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "TRUNCATE TABLE Staging.HumanResources_EmployeeDepartmentHistory",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "BusinessEntityID",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "BusinessEntityID",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "DepartmentID",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "DepartmentID",
+											"type": "Int16"
+										}
+									},
+									{
+										"source": {
+											"name": "ShiftID",
+											"type": "Byte"
+										},
+										"sink": {
+											"name": "ShiftID",
+											"type": "Byte"
+										}
+									},
+									{
+										"source": {
+											"name": "StartDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "StartDate",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "EndDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "EndDate",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "ModifiedDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "ModifiedDate",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Source_HumanResources_EmployeeDepartmentHistory",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Staging_HumanResources_EmployeeDepartmentHistory",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"folder": {
+					"name": "Staging"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Source_HumanResources_EmployeeDepartmentHistory')]",
+				"[concat(variables('factoryId'), '/datasets/Staging_HumanResources_EmployeeDepartmentHistory')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LoadStaging_HumanResources_EmployeePayHistory')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -454,6 +641,254 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Source_HumanResources_EmployeePayHistory')]",
 				"[concat(variables('factoryId'), '/datasets/Staging_HumanResources_EmployeePayHistory')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LoadStaging_HumanResources_Shift')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy source data to staging",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "TRUNCATE TABLE Staging.HumanResources_Shift",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "ShiftID",
+											"type": "Byte"
+										},
+										"sink": {
+											"name": "ShiftID",
+											"type": "Byte"
+										}
+									},
+									{
+										"source": {
+											"name": "Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "StartTime",
+											"type": "TimeSpan"
+										},
+										"sink": {
+											"name": "StartTime",
+											"type": "TimeSpan"
+										}
+									},
+									{
+										"source": {
+											"name": "EndTime",
+											"type": "TimeSpan"
+										},
+										"sink": {
+											"name": "EndTime",
+											"type": "TimeSpan"
+										}
+									},
+									{
+										"source": {
+											"name": "ModifiedDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "ModifiedDate",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Source_HumanResources_Shift",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Staging_HumanResources_Shift",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"folder": {
+					"name": "Staging"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Source_HumanResources_Shift')]",
+				"[concat(variables('factoryId'), '/datasets/Staging_HumanResources_Shift')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LoadStaging_Person_Person')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy source data to staging",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource"
+							},
+							"sink": {
+								"type": "AzureSqlSink"
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "BusinessEntityID",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "BusinessEntityID",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "PersonType",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PersonType",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Title",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Title",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "FirstName",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FirstName",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "MiddleName",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MiddleName",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LastName",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LastName",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "EmailPromotion",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "EmailPromotion",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "ModifiedDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "ModifiedDate",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Source_Person_Person",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Staging_Person_Person",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"folder": {
+					"name": "Staging"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Source_Person_Person')]",
+				"[concat(variables('factoryId'), '/datasets/Staging_Person_Person')]"
 			]
 		},
 		{
@@ -576,6 +1011,30 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Source_HumanResources_EmployeeDepartmentHistory')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LocalSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Source"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "HumanResources",
+					"table": "EmployeeDepartmentHistory"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Source_HumanResources_EmployeePayHistory')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -622,6 +1081,137 @@
 				"typeProperties": {
 					"schema": "HumanResources",
 					"table": "EmployeePayHistory"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Source_HumanResources_Shift')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LocalSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Source"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "ShiftID",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "StartTime",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "EndTime",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "HumanResources",
+					"table": "Shift"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Source_Person_Person')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LocalSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Source"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "BusinessEntityID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PersonType",
+						"type": "nchar"
+					},
+					{
+						"name": "NameStyle",
+						"type": "bit"
+					},
+					{
+						"name": "Title",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FirstName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MiddleName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LastName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Suffix",
+						"type": "nvarchar"
+					},
+					{
+						"name": "EmailPromotion",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "AdditionalContactInfo",
+						"type": "xml"
+					},
+					{
+						"name": "Demographics",
+						"type": "xml"
+					},
+					{
+						"name": "rowguid",
+						"type": "uniqueidentifier"
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "Person",
+					"table": "Person"
 				}
 			},
 			"dependsOn": [
@@ -768,342 +1358,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Staging_HumanResources_EmployeePayHistory')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSQLDatabase",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Staging"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "BusinessEntityID",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "RateChangeDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "Rate",
-						"type": "money",
-						"precision": 19,
-						"scale": 4
-					},
-					{
-						"name": "PayFrequency",
-						"type": "tinyint",
-						"precision": 3
-					},
-					{
-						"name": "ModifiedDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					}
-				],
-				"typeProperties": {
-					"schema": "Staging",
-					"table": "HumanResources_EmployeePayHistory"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLDatabase')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureSQLDatabase')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureSQLDatabase_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LocalSQLServer')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('LocalSQLServer_connectionString')]",
-					"userName": "[parameters('LocalSQLServer_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LocalSQLServer_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "IntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/IntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/IntegrationRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Source_HumanResources_Shift')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LocalSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Source"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [
-					{
-						"name": "ShiftID",
-						"type": "tinyint",
-						"precision": 3
-					},
-					{
-						"name": "Name",
-						"type": "nvarchar"
-					},
-					{
-						"name": "StartTime",
-						"type": "time",
-						"scale": 7
-					},
-					{
-						"name": "EndTime",
-						"type": "time",
-						"scale": 7
-					},
-					{
-						"name": "ModifiedDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					}
-				],
-				"typeProperties": {
-					"schema": "HumanResources",
-					"table": "Shift"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Staging_HumanResources_Shift')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSQLDatabase",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Staging"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "ShiftID",
-						"type": "tinyint",
-						"precision": 3
-					},
-					{
-						"name": "Name",
-						"type": "varchar"
-					},
-					{
-						"name": "StartTime",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "EndTime",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "ModifiedDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					}
-				],
-				"typeProperties": {
-					"schema": "Staging",
-					"table": "HumanResources_Shift"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLDatabase')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LoadStaging_HumanResources_Shift')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy source data to staging",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource"
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": "TRUNCATE TABLE Staging.HumanResources_Shift",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "ShiftID",
-											"type": "Byte"
-										},
-										"sink": {
-											"name": "ShiftID",
-											"type": "Byte"
-										}
-									},
-									{
-										"source": {
-											"name": "Name",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Name",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "StartTime",
-											"type": "TimeSpan"
-										},
-										"sink": {
-											"name": "StartTime",
-											"type": "TimeSpan"
-										}
-									},
-									{
-										"source": {
-											"name": "EndTime",
-											"type": "TimeSpan"
-										},
-										"sink": {
-											"name": "EndTime",
-											"type": "TimeSpan"
-										}
-									},
-									{
-										"source": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										}
-									}
-								]
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "Source_HumanResources_Shift",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "Staging_HumanResources_Shift",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"folder": {
-					"name": "Staging"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Source_HumanResources_Shift')]",
-				"[concat(variables('factoryId'), '/datasets/Staging_HumanResources_Shift')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Source_HumanResources_EmployeeDepartmentHistory')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LocalSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Source"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "HumanResources",
-					"table": "EmployeeDepartmentHistory"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Staging_HumanResources_EmployeeDepartmentHistory')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1158,139 +1412,19 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LoadStaging_HumanResources_EmployeeDepartmentHistory')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy source data to staging",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource"
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": "TRUNCATE TABLE Staging.HumanResources_EmployeeDepartmentHistory",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "BusinessEntityID",
-											"type": "Int32"
-										},
-										"sink": {
-											"name": "BusinessEntityID",
-											"type": "Int32"
-										}
-									},
-									{
-										"source": {
-											"name": "DepartmentID",
-											"type": "Int16"
-										},
-										"sink": {
-											"name": "DepartmentID",
-											"type": "Int16"
-										}
-									},
-									{
-										"source": {
-											"name": "ShiftID",
-											"type": "Byte"
-										},
-										"sink": {
-											"name": "ShiftID",
-											"type": "Byte"
-										}
-									},
-									{
-										"source": {
-											"name": "StartDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "StartDate",
-											"type": "DateTime"
-										}
-									},
-									{
-										"source": {
-											"name": "EndDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "EndDate",
-											"type": "DateTime"
-										}
-									},
-									{
-										"source": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										}
-									}
-								]
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "Source_HumanResources_EmployeeDepartmentHistory",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "Staging_HumanResources_EmployeeDepartmentHistory",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"folder": {
-					"name": "Staging"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Source_HumanResources_EmployeeDepartmentHistory')]",
-				"[concat(variables('factoryId'), '/datasets/Staging_HumanResources_EmployeeDepartmentHistory')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Source_Person_Person')]",
+			"name": "[concat(parameters('factoryName'), '/Staging_HumanResources_EmployeePayHistory')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "LocalSQLServer",
+					"referenceName": "AzureSQLDatabase",
 					"type": "LinkedServiceReference"
 				},
 				"folder": {
-					"name": "Source"
+					"name": "Staging"
 				},
 				"annotations": [],
-				"type": "SqlServerTable",
+				"type": "AzureSqlTable",
 				"schema": [
 					{
 						"name": "BusinessEntityID",
@@ -1298,49 +1432,21 @@
 						"precision": 10
 					},
 					{
-						"name": "PersonType",
-						"type": "nchar"
+						"name": "RateChangeDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
 					},
 					{
-						"name": "NameStyle",
-						"type": "bit"
+						"name": "Rate",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
 					},
 					{
-						"name": "Title",
-						"type": "nvarchar"
-					},
-					{
-						"name": "FirstName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "MiddleName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "LastName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "Suffix",
-						"type": "nvarchar"
-					},
-					{
-						"name": "EmailPromotion",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "AdditionalContactInfo",
-						"type": "xml"
-					},
-					{
-						"name": "Demographics",
-						"type": "xml"
-					},
-					{
-						"name": "rowguid",
-						"type": "uniqueidentifier"
+						"name": "PayFrequency",
+						"type": "tinyint",
+						"precision": 3
 					},
 					{
 						"name": "ModifiedDate",
@@ -1350,12 +1456,64 @@
 					}
 				],
 				"typeProperties": {
-					"schema": "Person",
-					"table": "Person"
+					"schema": "Staging",
+					"table": "HumanResources_EmployeePayHistory"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer')]"
+				"[concat(variables('factoryId'), '/linkedServices/AzureSQLDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Staging_HumanResources_Shift')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSQLDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Staging"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ShiftID",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Name",
+						"type": "varchar"
+					},
+					{
+						"name": "StartTime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "EndTime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "Staging",
+					"table": "HumanResources_Shift"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSQLDatabase')]"
 			]
 		},
 		{
@@ -1424,157 +1582,66 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LoadStaging_Person_Person')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/AzureSQLDatabase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
-					{
-						"name": "Copy source data to staging",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource"
-							},
-							"sink": {
-								"type": "AzureSqlSink"
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "BusinessEntityID",
-											"type": "Int32"
-										},
-										"sink": {
-											"name": "BusinessEntityID",
-											"type": "Int32"
-										}
-									},
-									{
-										"source": {
-											"name": "PersonType",
-											"type": "String"
-										},
-										"sink": {
-											"name": "PersonType",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Title",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Title",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "FirstName",
-											"type": "String"
-										},
-										"sink": {
-											"name": "FirstName",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "MiddleName",
-											"type": "String"
-										},
-										"sink": {
-											"name": "MiddleName",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "LastName",
-											"type": "String"
-										},
-										"sink": {
-											"name": "LastName",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "EmailPromotion",
-											"type": "Int32"
-										},
-										"sink": {
-											"name": "EmailPromotion",
-											"type": "Int32"
-										}
-									},
-									{
-										"source": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										}
-									}
-								]
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "Source_Person_Person",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "Staging_Person_Person",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSQLDatabase_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LocalSQLServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('LocalSQLServer_connectionString')]",
+					"userName": "[parameters('LocalSQLServer_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LocalSQLServer_password')]"
 					}
-				],
-				"folder": {
-					"name": "Staging"
 				},
-				"annotations": []
+				"connectVia": {
+					"referenceName": "IntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Source_Person_Person')]",
-				"[concat(variables('factoryId'), '/datasets/Staging_Person_Person')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/IntegrationRuntime')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LoadDimDepartment')]",
+			"name": "[concat(parameters('factoryName'), '/IntegrationRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LoadDimShift')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "LoadStaging_HumanResources_Department",
+						"name": "LoadStaging_HumanResources_Shift",
 						"type": "ExecutePipeline",
 						"dependsOn": [],
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "LoadStaging_HumanResources_Department",
+								"referenceName": "LoadStaging_HumanResources_Shift",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
@@ -1582,11 +1649,11 @@
 						}
 					},
 					{
-						"name": "Merge Department",
+						"name": "Merge Shift",
 						"type": "SqlServerStoredProcedure",
 						"dependsOn": [
 							{
-								"activity": "LoadStaging_HumanResources_Department",
+								"activity": "LoadStaging_HumanResources_Shift",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1601,7 +1668,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"storedProcedureName": "[[Dimension].[MergeDepartment]",
+							"storedProcedureName": "[[Dimension].[MergeShift]",
 							"storedProcedureParameters": {
 								"PipelineRunID": {
 									"value": {
@@ -1624,7 +1691,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/LoadStaging_HumanResources_Department')]",
+				"[concat(variables('factoryId'), '/pipelines/LoadStaging_HumanResources_Shift')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureSQLDatabase')]"
 			]
 		}
