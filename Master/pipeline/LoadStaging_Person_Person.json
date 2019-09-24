@@ -19,7 +19,9 @@
 						"type": "SqlServerSource"
 					},
 					"sink": {
-						"type": "AzureSqlSink"
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE Staging.Person_Person",
+						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
 					"translator": {
