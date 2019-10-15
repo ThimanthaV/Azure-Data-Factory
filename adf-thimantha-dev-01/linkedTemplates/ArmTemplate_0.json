@@ -4,7 +4,7 @@
 	"parameters": {
 		"factoryName": {
 			"type": "string",
-			"metadata": "Data Factory Name",
+			"metadata": "Data Factory name",
 			"defaultValue": "adf-thimantha-dev-01"
 		},
 		"AzureSQLDatabase_connectionString": {
