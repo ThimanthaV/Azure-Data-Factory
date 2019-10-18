@@ -1,0 +1,44 @@
+{
+	"name": "LoadFactLeave",
+	"properties": {
+		"activities": [
+			{
+				"name": "Merge Leave",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Fact].[MergeLeave]",
+					"storedProcedureParameters": {
+						"FailOnLookupFailure": {
+							"value": "TRUE",
+							"type": "Boolean"
+						},
+						"PipelineRunID": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureSQLDatabase",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "Fact"
+		},
+		"annotations": []
+	}
+}
